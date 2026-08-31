@@ -1,0 +1,167 @@
+{
+  "id": "serenity_blooms_brand",
+  "business_name": "Serenity Blooms",
+  "description": "Brand profile for Serenity Blooms, a small local cut-flower business. Use this profile to guide visual and stylistic choices for marketing emails while preserving a warm, handcrafted, floral feel.",
+  "brand_character": [
+    "warm",
+    "personal",
+    "handcrafted",
+    "local",
+    "elegant",
+    "floral",
+    "celebratory"
+  ],
+  "color_options": {
+    "page_background": [
+      "#FAE3ED",
+      "#FAF7F2",
+      "#FFFFFF"
+    ],
+    "section_background": [
+      "#FFFFFF",
+      "#FAF7F2",
+      "#FAE3ED"
+    ],
+    "accent": [
+      "#8A9A7B",
+      "#5C6B52",
+      "#E8C4C4"
+    ],
+    "heading_text": [
+      "#3D3632",
+      "#5C6B52"
+    ],
+    "body_text": [
+      "#3D3632",
+      "#6B635C"
+    ],
+    "button_background": [
+      "#5C6B52",
+      "#8A9A7B"
+    ],
+    "button_text": [
+      "#FFFFFF",
+      "#FAF7F2"
+    ],
+    "border": [
+      "#E8C4C4",
+      "#8A9A7B"
+    ]
+  },
+  "color_guidance": {
+    "primary_direction": "Favor soft blush/pink backgrounds, cream and white surfaces, sage green accents, and dark charcoal or warm-gray text.",
+    "avoid": [
+      "bright neon colors",
+      "highly saturated corporate blues",
+      "large areas of dark backgrounds",
+      "pink body text on pink backgrounds"
+    ],
+    "contrast_rule": "Use dark charcoal or sage-dark text on light backgrounds. Use white or cream text on dark sage buttons."
+  },
+  "font_options": {
+    "heading": [
+      "\"Cormorant Garamond\", Georgia, serif",
+      "Georgia, serif"
+    ],
+    "body": [
+      "\"Source Sans 3\", Arial, sans-serif",
+      "Arial, sans-serif"
+    ],
+    "fallback_heading": "Georgia, serif",
+    "fallback_body": "Arial, sans-serif"
+  },
+  "typography_guidance": {
+    "headings": "Use elegant serif typography for prominent headings when supported.",
+    "body": "Use a clean sans-serif stack for readability.",
+    "avoid": [
+      "decorative script fonts for body copy",
+      "very small body text",
+      "using more than two font families in one email"
+    ]
+  },
+  "spacing_options": {
+    "content_width_px": [
+      560,
+      600
+    ],
+    "section_padding_px": [
+      20,
+      24,
+      28,
+      32
+    ],
+    "button_vertical_padding_px": [
+      10,
+      12,
+      14
+    ],
+    "button_horizontal_padding_px": [
+      18,
+      22,
+      26
+    ]
+  },
+  "button_options": {
+    "border_radius_px": [
+      4,
+      6,
+      8
+    ],
+    "style_guidance": "Buttons should feel simple, polished, and easy to read rather than flashy."
+  },
+  "image_guidance": {
+    "style": [
+      "real floral photography",
+      "close-up flower detail",
+      "finished arrangements",
+      "flowers being held or presented",
+      "natural local-business presentation"
+    ],
+    "avoid": [
+      "generic corporate stock imagery",
+      "heavy graphic overlays that obscure flowers",
+      "visual treatments that make the business feel mass-market"
+    ]
+  },
+  "logo_guidance": {
+    "asset_source": "Use the primary Serenity Blooms logo returned by the logo retrieval tool.",
+    "recommended_placement": [
+      "email header",
+      "email footer when appropriate"
+    ],
+    "preferred_width_px": [
+      150,
+      180,
+      200
+    ],
+    "guidance": "Keep the logo clearly visible with generous surrounding space. Do not invent alternate logo artwork."
+  },
+  "copy_guidance": {
+    "voice": [
+      "friendly",
+      "personal",
+      "helpful",
+      "celebratory",
+      "locally grounded"
+    ],
+    "emphasis": [
+      "handcrafted flowers",
+      "local service",
+      "custom color coordination",
+      "special occasions",
+      "thoughtful details"
+    ],
+    "avoid": [
+      "overly corporate language",
+      "aggressive sales language",
+      "generic luxury-brand language",
+      "claims that are not supported by the campaign or product information"
+    ]
+  },
+  "email_design_rules": {
+    "overall": "Favor a light, airy, floral presentation with restrained use of blush pink and sage green.",
+    "text_rule": "Body copy should remain dark and highly readable; do not use pink as the main text color.",
+    "layout_rule": "Use approved email-safe blocks and allow the composition agent to choose block order within compatibility rules.",
+    "asset_rule": "Use only images, logos, and blocks returned by storehouse tools. Do not invent asset URLs or filenames."
+  }
+}

@@ -5,6 +5,20 @@ from pathlib import Path
 from jinja2 import Template
 
 
+def _normalize_product(product: str) -> str:
+    product = product.strip().lower()
+
+    aliases = {
+        "pocket square": "pocket_squares",
+        "pocket squares": "pocket_squares",
+        "bouquet": "bouquets",
+        "bouquets": "bouquets",
+        "boutonniere": "boutonnieres",
+        "boutonnieres": "boutonnieres",
+    }
+
+    return aliases.get(product, product.replace(" ", "_"))
+
 def get_profile(type: str, product: str, campaign_event: str) -> Dict[str, Any]:
     """
     Use this function first to retrieve the profiles for a particular
@@ -25,7 +39,16 @@ def get_profile(type: str, product: str, campaign_event: str) -> Dict[str, Any]:
         campaign_event: The campaign/event to retrieve the profile for.
     """
     project_root = os.path.dirname(os.path.abspath(__file__))
-    filename = f"{project_root}/storehouse/{type}/{product}_{campaign_event}.json"
+    product = _normalize_product(product)
+    campaign_event = campaign_event.strip().lower().replace(" ", "_")
+
+    filename = os.path.join(
+        project_root,
+        "storehouse",
+        type,
+        f"{product}_{campaign_event}.json",
+    )
+
     with open(filename, "r") as f:
         return json.load(f)
 
@@ -116,6 +139,28 @@ def get_logo() -> str:
         raise FileNotFoundError("Primary logo not found.")
 
     return str(matches[0])
+
+def get_brand() -> dict:
+    """
+    Return the Serenity Blooms brand guidelines.
+
+    Use this information to guide visual, typography, color,
+    image, logo, copy, and email-design decisions.
+    """
+
+    project_root = os.path.dirname(
+        os.path.abspath(__file__)
+    )
+
+    filename = os.path.join(
+        project_root,
+        "storehouse",
+        "assets",
+        "brand_profile.json",
+    )
+
+    with open(filename, "r") as f:
+        return json.load(f)
 
 
 def render_block(config: Dict[str, Any], html_block: str) -> str:
