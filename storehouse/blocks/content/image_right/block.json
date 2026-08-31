@@ -33,6 +33,36 @@
       "type": "text",
       "required": true,
       "cap_chars": 300
+    },
+    {
+      "element": "background_color",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.section_background"
+    },
+    {
+      "element": "text_color",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.body_text"
+    },
+    {
+      "element": "body_font",
+      "type": "font",
+      "required": true,
+      "source": "brand_profile.font_options.body"
+    },
+    {
+      "element": "heading_color",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.heading_text"
+    },
+    {
+      "element": "heading_font",
+      "type": "font",
+      "required": true,
+      "source": "brand_profile.font_options.heading"
     }
   ],
   "email_safe": true,
@@ -53,5 +83,9 @@
     "top_level_only": true,
     "nestable": false,
     "render_order": "top_to_bottom"
+  },
+  "brand_styling": {
+    "source": "brand_profile",
+    "guidance": "Choose only approved brand values from the source paths listed in the styling elements before rendering this block."
   }
 }

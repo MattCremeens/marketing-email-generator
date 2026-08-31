@@ -33,6 +33,54 @@
       "element": "cta_url",
       "type": "url",
       "required": false
+    },
+    {
+      "element": "background_color",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.section_background"
+    },
+    {
+      "element": "text_color",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.body_text"
+    },
+    {
+      "element": "body_font",
+      "type": "font",
+      "required": true,
+      "source": "brand_profile.font_options.body"
+    },
+    {
+      "element": "heading_color",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.heading_text"
+    },
+    {
+      "element": "heading_font",
+      "type": "font",
+      "required": true,
+      "source": "brand_profile.font_options.heading"
+    },
+    {
+      "element": "button_background",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.button_background"
+    },
+    {
+      "element": "button_text_color",
+      "type": "color",
+      "required": true,
+      "source": "brand_profile.color_options.button_text"
+    },
+    {
+      "element": "button_border_radius",
+      "type": "integer",
+      "required": true,
+      "source": "brand_profile.button_options.border_radius_px"
     }
   ],
   "email_safe": true,
@@ -51,5 +99,9 @@
     "top_level_only": true,
     "nestable": false,
     "render_order": "top_to_bottom"
+  },
+  "brand_styling": {
+    "source": "brand_profile",
+    "guidance": "Choose only approved brand values from the source paths listed in the styling elements before rendering this block."
   }
 }

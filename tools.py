@@ -11,6 +11,7 @@ def _normalize_product(product: str) -> str:
     aliases = {
         "pocket square": "pocket_squares",
         "pocket squares": "pocket_squares",
+        "pocket_square": "pocket_squares",
         "bouquet": "bouquets",
         "bouquets": "bouquets",
         "boutonniere": "boutonnieres",
