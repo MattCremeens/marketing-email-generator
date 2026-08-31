@@ -1,0 +1,57 @@
+{
+  "id": "content/image_right",
+  "category": "content",
+  "description": "Supporting floral image on the right with descriptive copy on the left.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "image_url",
+      "type": "image_url",
+      "required": true
+    },
+    {
+      "element": "alt_text",
+      "type": "text",
+      "required": true,
+      "cap_chars": 120
+    },
+    {
+      "element": "headline",
+      "type": "text",
+      "required": true,
+      "cap_chars": 70
+    },
+    {
+      "element": "body",
+      "type": "text",
+      "required": true,
+      "cap_chars": 300
+    }
+  ],
+  "email_safe": true,
+  "layout": "two_column",
+  "can_follow": [
+    "header",
+    "hero",
+    "content",
+    "product"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "cta",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

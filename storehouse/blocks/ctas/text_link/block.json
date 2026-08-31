@@ -1,0 +1,43 @@
+{
+  "id": "ctas/text_link",
+  "category": "cta",
+  "description": "Minimal text-link CTA for secondary ordering or contact actions.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "cta_text",
+      "type": "text",
+      "required": true,
+      "cap_chars": 50
+    },
+    {
+      "element": "cta_url",
+      "type": "url",
+      "required": true
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "hero",
+    "content",
+    "product"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

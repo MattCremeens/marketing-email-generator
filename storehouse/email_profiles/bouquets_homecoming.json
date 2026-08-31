@@ -1,0 +1,50 @@
+{
+  "id": "bouquets_homecoming",
+  "product": "bouquets",
+  "campaign": "homecoming",
+  "description": "Homecoming email profile for Serenity Blooms bouquets. Favor strong floral photography, a simple handcrafted/local-business feel, and a clear path to ordering or reserving flowers.",
+  "recommended_blocks": {
+    "headers": [
+      "headers/centered_logo",
+      "headers/logo_with_tagline",
+      "headers/minimal_logo"
+    ],
+    "heroes": [
+      "heroes/full_image",
+      "heroes/split_image_left",
+      "heroes/split_image_right"
+    ],
+    "content": [
+      "content/image_left",
+      "content/image_right",
+      "content/centered_text"
+    ],
+    "products": [
+      "products/single_feature",
+      "products/two_column",
+      "products/three_column"
+    ],
+    "ctas": [
+      "ctas/banner_cta",
+      "ctas/centered_button",
+      "ctas/text_link"
+    ],
+    "footers": [
+      "footers/standard",
+      "footers/compact",
+      "footers/social"
+    ]
+  },
+  "composition_guidance": {
+    "preferred_opening": "Lead with bouquet photography when a strong Homecoming bouquet image is available.",
+    "product_emphasis": "Show bouquet color, texture, seasonal flower character, and handcrafted detail rather than presenting the product like a mass-market catalog item.",
+    "local_business_emphasis": "Copy may reinforce that Serenity Blooms is a small local cut-flower business and that designs are handcrafted.",
+    "recommended_sequence": [
+      "header",
+      "hero",
+      "product_or_content",
+      "cta",
+      "footer"
+    ]
+  }
+}

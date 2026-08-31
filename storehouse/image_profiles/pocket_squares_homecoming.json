@@ -1,0 +1,19 @@
+{
+  "id": "pocket_squares_homecoming",
+  "product": "pocket square",
+  "campaign": "homecoming",
+  "description": "Image profile for Serenity Blooms Homecoming floral pocket squares.",
+  "image_ids": [
+    "pocketsquare_homecoming"
+  ],
+  "preferred_subjects": [
+    "finished floral pocket square",
+    "floral pocket square close-up",
+    "floral pocket square being worn"
+  ],
+  "use_for": [
+    "hero",
+    "product feature",
+    "supporting content"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "ctas/centered_button",
+  "category": "cta",
+  "description": "Centered call-to-action button for ordering or reserving Homecoming flowers.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "cta_text",
+      "type": "text",
+      "required": true,
+      "cap_chars": 30
+    },
+    {
+      "element": "cta_url",
+      "type": "url",
+      "required": true
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "hero",
+    "content",
+    "product"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

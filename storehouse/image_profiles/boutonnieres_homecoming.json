@@ -1,0 +1,20 @@
+{
+  "id": "boutonnieres_homecoming",
+  "product": "boutonnieres",
+  "campaign": "homecoming",
+  "description": "Image profile for Serenity Blooms Homecoming boutonnieres.",
+  "image_ids": [
+    "boutonniere_homecoming_03",
+    "boutonniere_homecoming_04"
+  ],
+  "preferred_subjects": [
+    "finished boutonniere",
+    "boutonniere close-up",
+    "boutonniere being worn"
+  ],
+  "use_for": [
+    "hero",
+    "product feature",
+    "supporting content"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "bouquets_homecoming",
+  "product": "bouquets",
+  "campaign": "homecoming",
+  "description": "Image profile for Serenity Blooms Homecoming bouquets.",
+  "image_ids": [
+    "bouquet_homecoming_01",
+    "bouquet_homecoming_02",
+    "bouquet_homecoming_03"
+  ],
+  "preferred_subjects": [
+    "finished bouquet",
+    "bouquet close-up",
+    "bouquet being held or presented"
+  ],
+  "use_for": [
+    "hero",
+    "product feature",
+    "supporting content"
+  ]
+}

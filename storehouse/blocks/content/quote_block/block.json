@@ -1,0 +1,46 @@
+{
+  "id": "content/quote_block",
+  "category": "content",
+  "description": "Simple highlighted text block for a short testimonial, flower note, or event message.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "quote",
+      "type": "text",
+      "required": true,
+      "cap_chars": 220
+    },
+    {
+      "element": "attribution",
+      "type": "text",
+      "required": false,
+      "cap_chars": 80
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "header",
+    "hero",
+    "content",
+    "product"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "cta",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

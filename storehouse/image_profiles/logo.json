@@ -1,0 +1,13 @@
+{
+  "id": "logo_01",
+  "description": "Primary Serenity Blooms logo for use in marketing emails.",
+  "asset_type": "logo",
+  "recommended_uses": [
+    "header",
+    "footer"
+  ],
+  "preferred_width": 180,
+  "max_width": 220,
+  "alt_text": "Serenity Blooms",
+  "required": true
+}

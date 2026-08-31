@@ -1,0 +1,55 @@
+{
+  "id": "heroes/text_only",
+  "category": "hero",
+  "description": "Text-only hero for concise event announcements or ordering information.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "headline",
+      "type": "text",
+      "required": true,
+      "cap_chars": 60
+    },
+    {
+      "element": "body",
+      "type": "text",
+      "required": true,
+      "cap_chars": 240
+    },
+    {
+      "element": "cta_text",
+      "type": "text",
+      "required": false,
+      "cap_chars": 30
+    },
+    {
+      "element": "cta_url",
+      "type": "url",
+      "required": false
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "start",
+    "header"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "cta",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

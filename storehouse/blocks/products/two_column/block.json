@@ -1,0 +1,70 @@
+{
+  "id": "products/two_column",
+  "category": "product",
+  "description": "Two-column product block for presenting two flower options side by side.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "products",
+      "type": "repeating_group",
+      "required": true,
+      "count": 2,
+      "elements": [
+        {
+          "element": "image_url",
+          "type": "image_url"
+        },
+        {
+          "element": "alt_text",
+          "type": "text",
+          "cap_chars": 120
+        },
+        {
+          "element": "name",
+          "type": "text",
+          "cap_chars": 50
+        },
+        {
+          "element": "description",
+          "type": "text",
+          "cap_chars": 160
+        },
+        {
+          "element": "cta_text",
+          "type": "text",
+          "cap_chars": 25
+        },
+        {
+          "element": "cta_url",
+          "type": "url"
+        }
+      ]
+    }
+  ],
+  "email_safe": true,
+  "layout": "two_column",
+  "can_follow": [
+    "header",
+    "hero",
+    "content",
+    "product"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "cta",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

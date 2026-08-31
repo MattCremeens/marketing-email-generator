@@ -1,0 +1,42 @@
+{
+  "id": "footers/compact",
+  "category": "footer",
+  "description": "Compact Serenity Blooms footer for shorter campaign emails.",
+  "products": [
+    "all"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "business_name",
+      "type": "text",
+      "required": true,
+      "cap_chars": 80
+    },
+    {
+      "element": "contact_text",
+      "type": "text",
+      "required": false,
+      "cap_chars": 120
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "header",
+    "hero",
+    "content",
+    "product",
+    "cta"
+  ],
+  "can_precede": [
+    "end"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

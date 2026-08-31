@@ -1,0 +1,46 @@
+{
+  "id": "headers/centered_logo",
+  "category": "header",
+  "description": "Centered Serenity Blooms logo header.",
+  "products": [
+    "all"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "logo_url",
+      "type": "image_url",
+      "required": true
+    },
+    {
+      "element": "logo_alt",
+      "type": "text",
+      "required": true,
+      "cap_chars": 120
+    },
+    {
+      "element": "logo_width",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "start"
+  ],
+  "can_precede": [
+    "hero",
+    "content",
+    "product",
+    "cta",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

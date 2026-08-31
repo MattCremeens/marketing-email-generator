@@ -1,0 +1,55 @@
+{
+  "id": "ctas/banner_cta",
+  "category": "cta",
+  "description": "Wide CTA block with a short Homecoming message and ordering button.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "headline",
+      "type": "text",
+      "required": true,
+      "cap_chars": 60
+    },
+    {
+      "element": "body",
+      "type": "text",
+      "required": false,
+      "cap_chars": 160
+    },
+    {
+      "element": "cta_text",
+      "type": "text",
+      "required": true,
+      "cap_chars": 30
+    },
+    {
+      "element": "cta_url",
+      "type": "url",
+      "required": true
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "hero",
+    "content",
+    "product"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

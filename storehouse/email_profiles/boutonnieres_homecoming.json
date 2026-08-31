@@ -1,0 +1,50 @@
+{
+  "id": "boutonnieres_homecoming",
+  "product": "boutonnieres",
+  "campaign": "homecoming",
+  "description": "Homecoming email profile for Serenity Blooms boutonnieres. Favor close-up floral detail, wearable styling, handcrafted character, and simple ordering information.",
+  "recommended_blocks": {
+    "headers": [
+      "headers/centered_logo",
+      "headers/minimal_logo",
+      "headers/logo_with_tagline"
+    ],
+    "heroes": [
+      "heroes/split_image_left",
+      "heroes/split_image_right",
+      "heroes/full_image"
+    ],
+    "content": [
+      "content/image_left",
+      "content/image_right",
+      "content/centered_text"
+    ],
+    "products": [
+      "products/single_feature",
+      "products/two_column",
+      "products/three_column"
+    ],
+    "ctas": [
+      "ctas/centered_button",
+      "ctas/banner_cta",
+      "ctas/text_link"
+    ],
+    "footers": [
+      "footers/standard",
+      "footers/compact",
+      "footers/social"
+    ]
+  },
+  "composition_guidance": {
+    "preferred_opening": "Use a close or medium-detail boutonniere image where possible so the floral workmanship is immediately visible.",
+    "product_emphasis": "Emphasize fresh flowers, coordinated color, wearable scale, and handcrafted construction.",
+    "local_business_emphasis": "Keep the presentation personal and local rather than highly corporate or catalog-like.",
+    "recommended_sequence": [
+      "header",
+      "hero",
+      "product_or_content",
+      "cta",
+      "footer"
+    ]
+  }
+}

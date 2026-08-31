@@ -1,0 +1,50 @@
+{
+  "id": "pocket_squares_homecoming",
+  "product": "pocket squares",
+  "campaign": "homecoming",
+  "description": "Homecoming email profile for Serenity Blooms floral pocket squares. Favor imagery that clearly shows how the floral pocket square is worn, its distinctive alternative to a traditional boutonniere, and its handcrafted floral detail.",
+  "recommended_blocks": {
+    "headers": [
+      "headers/centered_logo",
+      "headers/minimal_logo",
+      "headers/logo_with_tagline"
+    ],
+    "heroes": [
+      "heroes/split_image_right",
+      "heroes/split_image_left",
+      "heroes/full_image"
+    ],
+    "content": [
+      "content/image_left",
+      "content/image_right",
+      "content/centered_text"
+    ],
+    "products": [
+      "products/single_feature",
+      "products/two_column",
+      "products/three_column"
+    ],
+    "ctas": [
+      "ctas/centered_button",
+      "ctas/banner_cta",
+      "ctas/text_link"
+    ],
+    "footers": [
+      "footers/standard",
+      "footers/compact",
+      "footers/social"
+    ]
+  },
+  "composition_guidance": {
+    "preferred_opening": "Prefer an image that makes it immediately clear the flowers are designed to be worn as a pocket square.",
+    "product_emphasis": "Show the product in context when possible and explain its distinctive floral presentation without overloading the email with copy.",
+    "local_business_emphasis": "Keep the design handcrafted, approachable, and appropriate for a small local flower business.",
+    "recommended_sequence": [
+      "header",
+      "hero",
+      "product_or_content",
+      "cta",
+      "footer"
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "id": "footers/standard",
+  "category": "footer",
+  "description": "Standard Serenity Blooms footer with business and contact information.",
+  "products": [
+    "all"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "business_name",
+      "type": "text",
+      "required": true,
+      "cap_chars": 80
+    },
+    {
+      "element": "contact_text",
+      "type": "text",
+      "required": true,
+      "cap_chars": 160
+    },
+    {
+      "element": "website_text",
+      "type": "text",
+      "required": false,
+      "cap_chars": 60
+    },
+    {
+      "element": "website_url",
+      "type": "url",
+      "required": false
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "header",
+    "hero",
+    "content",
+    "product",
+    "cta"
+  ],
+  "can_precede": [
+    "end"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

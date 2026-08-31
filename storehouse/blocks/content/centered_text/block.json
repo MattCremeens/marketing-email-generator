@@ -1,0 +1,46 @@
+{
+  "id": "content/centered_text",
+  "category": "content",
+  "description": "Centered text block for event details, ordering notes, or flower information.",
+  "products": [
+    "pocket squares",
+    "bouquets",
+    "boutonnieres"
+  ],
+  "campaigns": [
+    "homecoming"
+  ],
+  "elements": [
+    {
+      "element": "headline",
+      "type": "text",
+      "required": true,
+      "cap_chars": 70
+    },
+    {
+      "element": "body",
+      "type": "text",
+      "required": true,
+      "cap_chars": 350
+    }
+  ],
+  "email_safe": true,
+  "layout": "single_column",
+  "can_follow": [
+    "header",
+    "hero",
+    "content",
+    "product"
+  ],
+  "can_precede": [
+    "content",
+    "product",
+    "cta",
+    "footer"
+  ],
+  "composition_rules": {
+    "top_level_only": true,
+    "nestable": false,
+    "render_order": "top_to_bottom"
+  }
+}

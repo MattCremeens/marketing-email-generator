@@ -1,0 +1,10 @@
+{
+  "note": "Email-safe font stacks only. No font files are included.",
+  "stacks": [
+    {"id": "classic_serif", "css": "Georgia, 'Times New Roman', serif", "best_for": ["elegant", "romantic", "editorial"]},
+    {"id": "clean_sans", "css": "Arial, Helvetica, sans-serif", "best_for": ["modern", "clean", "product-focused"]},
+    {"id": "friendly_sans", "css": "Verdana, Geneva, sans-serif", "best_for": ["friendly", "readable", "informational"]},
+    {"id": "compact_sans", "css": "Tahoma, Verdana, sans-serif", "best_for": ["compact", "practical", "simple"]},
+    {"id": "humanist_sans", "css": "'Trebuchet MS', Arial, sans-serif", "best_for": ["warm", "casual", "approachable"]}
+  ]
+}
