@@ -1,12 +1,16 @@
+from google.adk.agents import Agent, LoopAgent, SequentialAgent
+from google.adk.apps.app import App, ResumabilityConfig
+from google.adk.tools import request_input
+
+
 from tools import *
-from google.adk.agents import Agent
 
 
 GEMINI_MODEL = "gemini-3.5-flash-lite"
 
 
-root_agent = Agent(
-    name="test_agent",        
+email_generation_agent = Agent(
+    name="email_generation_agent",        
     model=GEMINI_MODEL,
     description=(
     "You can create cool emails."
@@ -58,6 +62,12 @@ root_agent = Agent(
         Do not invent new brand colors, font families, logo treatments, or visual styles unless the user explicitly asks for something outside the approved brand profile.
 
         3. Retrieve the product/campaign profiles
+
+        Call list_profiles("email_profiles") and list_profiles("image_profiles") first.
+
+        Pick the profile ID whose product matches the request. Do not invent a profile ID.
+
+        Never use a related product as a stand-in. Pocket squares and boutonnieres are different products.
 
         Use the profile retrieval tool twice for each relevant product/campaign combination.
 
@@ -295,7 +305,8 @@ root_agent = Agent(
     """
     ),
         
-    tools=[get_profile, 
+    tools=[list_profiles,
+           get_profile, 
            list_block_types_subtypes, 
            get_block, 
            get_image, 
@@ -305,4 +316,74 @@ root_agent = Agent(
            get_brand, 
            render_block, 
            stitch_email],
+    output_key="email_html"
+)
+
+hitl_agent = Agent(
+    name="hitl_agent",
+    model=GEMINI_MODEL,
+    description="You pause to receive feedback from the user.",
+    instruction="""
+    You are a human in the loop agent that receives feedback from the user.
+
+    If request_input has NOT yet returned a human response during this
+    review iteration, call request_input exactly once.
+
+    Ask exactly:
+    "Please review the email above. Reply 'approve' if you approve it,
+    or provide any changes you would like made."
+
+    Do not include, repeat, summarize, or reproduce the email HTML in the
+    request_input prompt.
+
+    IMPORTANT:
+    If request_input has returned a human response, DO NOT call
+    request_input again during this iteration.
+
+    If the returned human response is exactly "approve", call exit_loop.
+
+    Otherwise, return the entire human response verbatim as your final
+    output. Do not call request_input again. Do not revise the email
+    yourself and do not add commentary.
+    """,
+    tools=[request_input, exit_loop],
+    output_key="feedback"
+)
+
+revision_agent = Agent(
+    name="revision_agent",
+    model=GEMINI_MODEL,
+    description="You revise the html email based on the user's feedback.",
+    instruction="""
+    Modify this email html: {email_html}
+    based on the user's feedback: {feedback}
+    and return the revised email html.
+
+    Apply only the revisions requested by the human. Preserve all other
+    content, structure, styling, and assets unless a requested change requires
+    modifying them.
+
+    Return the complete revised HTML only. Do not approve the email or decide
+    that the review process is complete.
+    """,
+    output_key="email_html"
+)
+
+review_revise_agent = LoopAgent(
+    name="review_revise_agent",
+    sub_agents=[hitl_agent, revision_agent],
+
+)
+
+root_agent = SequentialAgent(
+    name="sequential_agent",
+    sub_agents=[email_generation_agent, review_revise_agent],
+)
+
+app = App(
+    name="marketing_email_generator",
+    root_agent=root_agent,
+    resumability_config=ResumabilityConfig(
+        is_resumable=True
+    ),
 )

@@ -3,7 +3,12 @@ from typing import Dict, Any, Tuple, List
 import os
 from pathlib import Path
 from jinja2 import Template
+from google.adk.tools.tool_context import ToolContext
 
+
+def exit_loop(tool_context: ToolContext) -> dict:
+    tool_context.actions.escalate = True
+    return {"status": "approved"}
 
 def _normalize_product(product: str) -> str:
     product = product.strip().lower()
@@ -19,6 +24,27 @@ def _normalize_product(product: str) -> str:
     }
 
     return aliases.get(product, product.replace(" ", "_"))
+
+
+def list_profiles(type: str) -> List[str]:
+    """List available profile IDs for a profile type.
+
+    Call this before get_profile and pass a product/campaign
+    combination from this list. Do not substitute a related product.
+    Pocket squares and boutonnieres are different products.
+
+    Args:
+        type: The profile type to list. Must be one of
+            "email_profiles" or "image_profiles".
+    """
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    profiles_dir = os.path.join(project_root, "storehouse", type)
+    return sorted(
+        os.path.splitext(name)[0]
+        for name in os.listdir(profiles_dir)
+        if name.endswith(".json")
+    )
+
 
 def get_profile(type: str, product: str, campaign_event: str) -> Dict[str, Any]:
     """
@@ -72,9 +98,24 @@ def get_block(block_type: str, block_subtype: str) -> Tuple[Dict[str, Any], str]
     """
     Get an HTML block to be used in an email.
 
+    block_type and block_subtype must be a valid pair. Do not mix a
+    subtype from one type with a different type.
+
+    Valid combinations:
+
+    * headers: centered_logo, logo_with_tagline, minimal_logo
+    * heroes: full_image, split_image_left, split_image_right, text_only
+    * content: centered_text, image_left, image_right, quote_block
+    * products: single_feature, two_column, three_column
+    * ctas: banner_cta, centered_button, text_link
+    * footers: compact, social, standard
+
     Args:
-        block_type: The type of block to get. Must be one of "headers", "heroes", "content", "products", "ctas", "footers".
-        block_subtype: The subtype of block to get. Must be one of "centered_logo", "logo_with_tagline", "minimal_logo", "full_image", "split_image_left", "split_image_right", "image_left", "image_right", "centered_text", "single_feature", "two_column", "three_column", "banner_cta", "centered_button", "text_link".
+        block_type: The type of block to get. Must be one of
+            "headers", "heroes", "content", "products", "ctas", "footers".
+        block_subtype: The subtype for that type only, from the matching
+            list above. For example, "minimal_logo" is valid only with
+            block_type="headers", never with "footers".
     """
     project_root = os.path.dirname(os.path.abspath(__file__))
     filename_json = f"{project_root}/storehouse/blocks/{block_type}/{block_subtype}/block.json"
