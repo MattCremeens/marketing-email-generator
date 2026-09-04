@@ -144,6 +144,10 @@ def get_image(image_id: str) -> str:
             f"No image found with id '{image_id}'"
         )
 
+    asset_base_url = os.getenv("EMAIL_ASSET_BASE_URL", "").rstrip("/")
+    if asset_base_url:
+        return f"{asset_base_url}/images/{matches[0].name}"
+
     return str(matches[0])
 
 
@@ -179,6 +183,10 @@ def get_logo() -> str:
 
     if not matches:
         raise FileNotFoundError("Primary logo not found.")
+
+    asset_base_url = os.getenv("EMAIL_ASSET_BASE_URL", "").rstrip("/")
+    if asset_base_url:
+        return f"{asset_base_url}/logos/{matches[0].name}"
 
     return str(matches[0])
 

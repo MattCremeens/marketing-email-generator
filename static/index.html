@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Serenity Blooms Email Studio</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-lockup">
+      <img src="/assets/logos/logo_01.jpg" alt="Serenity Blooms" class="brand-logo">
+      <div>
+        <div class="eyebrow">Serenity Blooms</div>
+        <h1>Email Studio</h1>
+      </div>
+    </div>
+    <button id="newEmailBtn" class="button secondary">+ New Email</button>
+  </header>
+
+  <main class="workspace">
+    <section class="panel chat-panel">
+      <div class="panel-heading">
+        <div>
+          <div class="eyebrow">Agent workspace</div>
+          <h2>Chat</h2>
+        </div>
+        <span id="draftStatus" class="status-pill">No draft</span>
+      </div>
+
+      <div id="chatHistory" class="chat-history">
+        <div class="message assistant">
+          Describe the marketing email you want to create. Once a draft exists, new messages here will revise that draft.
+        </div>
+      </div>
+
+      <form id="chatForm" class="chat-compose">
+        <textarea id="chatInput" rows="4" placeholder="Create a Homecoming email featuring floral pocket squares..."></textarea>
+        <div class="compose-footer">
+          <span id="workingText" class="working-text" aria-live="polite"></span>
+          <button id="chatSubmit" class="button primary" type="submit">Generate Email</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel editor-panel">
+      <div class="panel-heading editor-heading">
+        <div>
+          <div class="eyebrow">Current draft</div>
+          <h2>Email</h2>
+        </div>
+        <button id="saveDraftBtn" class="button secondary small" disabled>Save Draft</button>
+      </div>
+
+      <div class="metadata-grid">
+        <label>
+          <span>Subject</span>
+          <input id="subjectInput" type="text" placeholder="Generated subject line" disabled>
+        </label>
+        <label>
+          <span>Preheader</span>
+          <input id="preheaderInput" type="text" placeholder="Generated preheader" disabled>
+        </label>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="preview" type="button">Preview</button>
+        <button class="tab" data-tab="html" type="button">HTML</button>
+      </div>
+
+      <div id="previewPane" class="tab-pane active">
+        <div id="emptyPreview" class="empty-state">
+          <div class="flower-mark">✿</div>
+          <h3>Your email preview will appear here</h3>
+          <p>Start with a message in the chat panel.</p>
+        </div>
+        <iframe id="emailPreview" title="Email preview" sandbox="" hidden></iframe>
+      </div>
+
+      <div id="htmlPane" class="tab-pane">
+        <textarea id="htmlEditor" class="code-editor" spellcheck="false" disabled></textarea>
+        <p class="hint">You can make small HTML changes yourself. Save the draft before asking the agent for another revision.</p>
+      </div>
+    </section>
+  </main>
+
+  <section class="send-panel panel">
+    <div class="send-copy">
+      <div class="eyebrow">Final approval</div>
+      <h2>Recipients & Send</h2>
+      <p>Paste addresses separated by commas, semicolons, or new lines. Unsubscribed addresses are automatically suppressed.</p>
+    </div>
+    <div class="recipient-area">
+      <textarea id="recipientsInput" rows="4" placeholder="customer1@example.com&#10;customer2@example.com"></textarea>
+      <div class="recipient-footer">
+        <div id="recipientSummary" class="recipient-summary">No recipients checked yet.</div>
+        <div class="send-actions">
+          <button id="validateBtn" class="button secondary" type="button">Check Recipients</button>
+          <button id="sendBtn" class="button primary" type="button" disabled title="Gmail OAuth will be connected in the next phase">Approve & Send</button>
+        </div>
+      </div>
+      <div class="oauth-note">Gmail OAuth is intentionally not connected in this first local build, so sending remains disabled.</div>
+    </div>
+  </section>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
