@@ -39,7 +39,15 @@ def _generation_agent() -> Agent:
         name="web_email_generation_agent",
         model=GEMINI_MODEL,
         description=email_generation_agent.description,
-        instruction=email_generation_agent.instruction,
+        instruction=email_generation_agent.instruction + """
+
+        FINAL OUTPUT CONTRACT FOR THE WEB APPLICATION:
+        Return ONLY the complete rendered HTML email as your final response.
+        Do not introduce the email. Do not explain it. Do not summarize it.
+        Do not wrap it in Markdown or triple-backtick code fences.
+        Your final response must begin with an HTML tag and contain no prose
+        before or after the email HTML.
+        """,
         tools=[
             list_profiles,
             get_profile,
@@ -63,7 +71,12 @@ def _revision_agent() -> Agent:
         name="web_revision_agent",
         model=GEMINI_MODEL,
         description=revision_agent.description,
-        instruction=revision_agent.instruction,
+        instruction=revision_agent.instruction + """
+
+        FINAL OUTPUT CONTRACT FOR THE WEB APPLICATION:
+        Return ONLY the complete revised HTML email. Do not add prose,
+        explanations, Markdown, or triple-backtick code fences before or after it.
+        """,
         output_key="email_html",
     )
 
@@ -129,6 +142,48 @@ def _strip_code_fence(value: str) -> str:
     return fenced.group(1).strip() if fenced else value
 
 
+def _extract_html(value: str) -> str:
+    """Return only the HTML portion of an agent response.
+
+    The prompt requires raw HTML, but this deliberately defends against an LLM
+    adding an introduction such as ``Here is the email:```html ...``` ``.  We
+    never want that explanatory text or Markdown fence to become part of the
+    message delivered through Gmail.
+    """
+    value = value.strip()
+
+    # Prefer an explicitly fenced HTML payload even when prose appears before it.
+    fenced = re.search(r"```html\s*(.*?)\s*```", value, flags=re.I | re.S)
+    if fenced:
+        candidate = fenced.group(1).strip()
+    else:
+        candidate = _strip_code_fence(value)
+
+    # Remove any accidental prose before the first plausible email HTML element.
+    starts = []
+    for pattern in (r"<!doctype\s+html", r"<html\b", r"<body\b", r"<table\b", r"<div\b"):
+        match = re.search(pattern, candidate, flags=re.I)
+        if match:
+            starts.append(match.start())
+    if not starts:
+        raise ValueError(
+            "The email agent did not return HTML. Please retry the generation request."
+        )
+    candidate = candidate[min(starts):].strip()
+
+    # If the model appended prose after a complete document, discard it.
+    html_close = list(re.finditer(r"</html\s*>", candidate, flags=re.I))
+    if html_close:
+        candidate = candidate[: html_close[-1].end()].strip()
+
+    if "```" in candidate:
+        candidate = candidate.replace("```html", "").replace("```HTML", "").replace("```", "").strip()
+
+    if not re.search(r"<(?:html|body|table|div)\b", candidate, flags=re.I):
+        raise ValueError("The email agent response could not be validated as HTML.")
+    return candidate
+
+
 def _parse_metadata(value: str) -> dict[str, str]:
     value = _strip_code_fence(value)
     try:
@@ -146,7 +201,7 @@ def _parse_metadata(value: str) -> dict[str, str]:
 
 
 async def generate_email(request: str) -> dict[str, str]:
-    html = _strip_code_fence(await _run_agent(_generation_agent(), request))
+    html = _extract_html(await _run_agent(_generation_agent(), request))
     metadata_prompt = f"""ORIGINAL USER REQUEST:\n{request}\n\nEMAIL HTML:\n{html}"""
     metadata = _parse_metadata(await _run_agent(_metadata_agent(), metadata_prompt))
     return {"html": html, **metadata}
@@ -158,7 +213,7 @@ async def revise_email(
     subject: str,
     preheader: str,
 ) -> dict[str, str]:
-    revised_html = _strip_code_fence(
+    revised_html = _extract_html(
         await _run_agent(
             _revision_agent(),
             "Apply the requested revision.",
