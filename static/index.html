@@ -91,15 +91,28 @@
       <p>Paste addresses separated by commas, semicolons, or new lines. Unsubscribed addresses are automatically suppressed.</p>
     </div>
     <div class="recipient-area">
-      <textarea id="recipientsInput" rows="4" placeholder="customer1@example.com&#10;customer2@example.com"></textarea>
-      <div class="recipient-footer">
-        <div id="recipientSummary" class="recipient-summary">No recipients checked yet.</div>
-        <div class="send-actions">
-          <button id="validateBtn" class="button secondary" type="button">Check Recipients</button>
-          <button id="sendBtn" class="button primary" type="button" disabled title="Gmail OAuth will be connected in the next phase">Approve & Send</button>
+      <div class="gmail-connection">
+        <div>
+          <div class="connection-label">Sending account</div>
+          <div id="gmailStatus" class="connection-status">Checking Gmail connection…</div>
+        </div>
+        <div class="connection-actions">
+          <a id="connectGmailBtn" class="button secondary" href="/auth/google/start" hidden>Connect Gmail</a>
+          <button id="disconnectGmailBtn" class="button secondary small" type="button" hidden>Disconnect</button>
         </div>
       </div>
-      <div class="oauth-note">Gmail OAuth is intentionally not connected in this first local build, so sending remains disabled.</div>
+      <textarea id="recipientsInput" rows="4" placeholder="customer1@example.com&#10;customer2@example.com"></textarea>
+      <div class="recipient-footer">
+        <div>
+          <div id="recipientSummary" class="recipient-summary">No recipients checked yet.</div>
+          <div id="sendWorkingText" class="working-text" aria-live="polite"></div>
+        </div>
+        <div class="send-actions">
+          <button id="validateBtn" class="button secondary" type="button">Check Recipients</button>
+          <button id="sendBtn" class="button primary" type="button" disabled>Approve & Send</button>
+        </div>
+      </div>
+      <div id="oauthNote" class="oauth-note">Connect the Gmail account that should send Serenity Blooms email.</div>
     </div>
   </section>
 

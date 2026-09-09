@@ -9,6 +9,5 @@ __pycache__/
 *.pyzw
 *.pyzwz
 *.pyzwzw
-*.html
-!static/*.html
 test.*
+data/

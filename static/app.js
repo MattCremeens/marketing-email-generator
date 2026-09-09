@@ -4,6 +4,10 @@ const state = {
   subject: "",
   preheader: "",
   busy: false,
+  sendBusy: false,
+  gmailConnected: false,
+  gmailConfigured: false,
+  gmailEmail: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -18,13 +22,15 @@ const preheaderInput = $("preheaderInput");
 const emailPreview = $("emailPreview");
 const emptyPreview = $("emptyPreview");
 const saveDraftBtn = $("saveDraftBtn");
+const recipientsInput = $("recipientsInput");
+const sendBtn = $("sendBtn");
 
 function toast(message, isError = false) {
   const el = $("toast");
   el.textContent = message;
   el.classList.toggle("error", isError);
   el.classList.add("show");
-  window.setTimeout(() => el.classList.remove("show"), 3500);
+  window.setTimeout(() => el.classList.remove("show"), 4500);
 }
 
 function addMessage(role, text) {
@@ -33,6 +39,10 @@ function addMessage(role, text) {
   el.textContent = text;
   chatHistory.appendChild(el);
   chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+function updateSendButton() {
+  sendBtn.disabled = state.busy || state.sendBusy || !state.draftId || !state.gmailConnected || !recipientsInput.value.trim();
 }
 
 function setBusy(busy, label = "") {
@@ -48,6 +58,15 @@ function setBusy(busy, label = "") {
     draftStatus.textContent = state.draftId ? "Draft ready" : "No draft";
     draftStatus.classList.remove("working");
   }
+  updateSendButton();
+}
+
+function setSendBusy(busy, label = "") {
+  state.sendBusy = busy;
+  $("sendWorkingText").textContent = busy ? label : "";
+  $("validateBtn").disabled = busy;
+  $("disconnectGmailBtn").disabled = busy;
+  updateSendButton();
 }
 
 function previewHtml(html) {
@@ -77,14 +96,22 @@ function loadDraft(draft) {
   draftStatus.textContent = "Draft ready";
   chatSubmit.textContent = "Revise Email";
   previewHtml(state.html);
+  updateSendButton();
 }
 
-async function api(path, payload) {
+async function api(path, payload = {}) {
   const response = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.detail || `Request failed (${response.status})`);
+  return data;
+}
+
+async function getApi(path) {
+  const response = await fetch(path);
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(data.detail || `Request failed (${response.status})`);
   return data;
@@ -96,13 +123,50 @@ async function saveDraft(showToast = true) {
   state.subject = subjectInput.value;
   state.preheader = preheaderInput.value;
   previewHtml(state.html);
-  await api("/api/draft/save", {
+  const saved = await api("/api/draft/save", {
     draft_id: state.draftId,
     html: state.html,
     subject: state.subject,
     preheader: state.preheader,
   });
+  // The application can restore required elements (such as the unsubscribe footer)
+  // after a manual HTML edit. Keep the editor and preview in sync with that result.
+  state.html = saved.html || state.html;
+  state.subject = saved.subject ?? state.subject;
+  state.preheader = saved.preheader ?? state.preheader;
+  htmlEditor.value = state.html;
+  subjectInput.value = state.subject;
+  preheaderInput.value = state.preheader;
+  previewHtml(state.html);
   if (showToast) toast("Draft saved.");
+}
+
+async function refreshGmailStatus() {
+  try {
+    const status = await getApi("/api/gmail/status");
+    state.gmailConfigured = Boolean(status.configured);
+    state.gmailConnected = Boolean(status.connected);
+    state.gmailEmail = status.email || null;
+
+    $("connectGmailBtn").hidden = state.gmailConnected || !state.gmailConfigured;
+    $("disconnectGmailBtn").hidden = !state.gmailConnected;
+
+    if (!state.gmailConfigured) {
+      $("gmailStatus").textContent = "OAuth credentials not configured";
+      $("oauthNote").textContent = "Set GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET, then restart the app.";
+    } else if (state.gmailConnected) {
+      $("gmailStatus").textContent = `Connected: ${state.gmailEmail || "Gmail"}`;
+      $("oauthNote").textContent = "Approve & Send will send one personalized message to each sendable recipient.";
+    } else {
+      $("gmailStatus").textContent = "No Gmail account connected";
+      $("oauthNote").textContent = "Connect the Gmail account that should send Serenity Blooms email.";
+    }
+  } catch (error) {
+    state.gmailConnected = false;
+    $("gmailStatus").textContent = "Could not check Gmail connection";
+    $("oauthNote").textContent = error.message;
+  }
+  updateSendButton();
 }
 
 $("chatForm").addEventListener("submit", async (event) => {
@@ -145,6 +209,12 @@ saveDraftBtn.addEventListener("click", async () => {
 });
 
 htmlEditor.addEventListener("input", () => previewHtml(htmlEditor.value));
+subjectInput.addEventListener("input", () => { state.subject = subjectInput.value; });
+preheaderInput.addEventListener("input", () => { state.preheader = preheaderInput.value; });
+recipientsInput.addEventListener("input", () => {
+  $("recipientSummary").textContent = "Recipient list changed. Check recipients again before sending.";
+  updateSendButton();
+});
 
 for (const tab of document.querySelectorAll(".tab")) {
   tab.addEventListener("click", () => {
@@ -170,12 +240,13 @@ $("newEmailBtn").addEventListener("click", () => {
   chatHistory.innerHTML = "";
   addMessage("assistant", "Describe the next marketing email you want to create.");
   previewHtml("");
+  updateSendButton();
   chatInput.focus();
 });
 
 $("validateBtn").addEventListener("click", async () => {
   try {
-    const result = await api("/api/recipients/validate", { recipients: $("recipientsInput").value });
+    const result = await api("/api/recipients/validate", { recipients: recipientsInput.value });
     const c = result.counts;
     $("recipientSummary").textContent = `${c.sendable} sendable · ${c.suppressed} unsubscribed · ${c.invalid} invalid`;
     if (c.invalid || c.suppressed) {
@@ -188,3 +259,62 @@ $("validateBtn").addEventListener("click", async () => {
     }
   } catch (error) { toast(error.message, true); }
 });
+
+$("disconnectGmailBtn").addEventListener("click", async () => {
+  try {
+    await api("/api/gmail/disconnect");
+    toast("Gmail disconnected.");
+    await refreshGmailStatus();
+  } catch (error) { toast(error.message, true); }
+});
+
+sendBtn.addEventListener("click", async () => {
+  if (state.sendBusy || !state.draftId) return;
+  try {
+    await saveDraft(false);
+    const validation = await api("/api/recipients/validate", { recipients: recipientsInput.value });
+    const c = validation.counts;
+    $("recipientSummary").textContent = `${c.sendable} sendable · ${c.suppressed} unsubscribed · ${c.invalid} invalid`;
+    if (!c.sendable) {
+      throw new Error("There are no sendable recipients.");
+    }
+
+    const ignored = c.suppressed + c.invalid;
+    const message = ignored
+      ? `Send this email to ${c.sendable} recipient(s)? ${ignored} invalid or unsubscribed address(es) will not be sent.`
+      : `Send this email to ${c.sendable} recipient(s) from ${state.gmailEmail || "the connected Gmail account"}?`;
+    if (!window.confirm(message)) return;
+
+    setSendBusy(true, "Sending approved email…");
+    const result = await api("/api/send", {
+      draft_id: state.draftId,
+      recipients: recipientsInput.value,
+    });
+    const counts = result.counts;
+    $("recipientSummary").textContent = `${counts.sent} sent · ${counts.suppressed + counts.suppressed_before_send} unsubscribed · ${counts.invalid} invalid · ${counts.failed} failed`;
+    if (counts.failed) {
+      toast(`Sent ${counts.sent}; ${counts.failed} message(s) failed.`, true);
+    } else {
+      toast(`Email sent successfully to ${counts.sent} recipient(s).`);
+    }
+  } catch (error) {
+    toast(error.message, true);
+  } finally {
+    setSendBusy(false);
+  }
+});
+
+function handleOAuthReturn() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("gmail") === "connected") {
+    toast("Gmail connected successfully.");
+    window.history.replaceState({}, "", window.location.pathname);
+  } else if (params.get("gmail_error")) {
+    toast(`Gmail connection failed: ${params.get("gmail_error")}`, true);
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+}
+
+handleOAuthReturn();
+refreshGmailStatus();
+updateSendButton();
