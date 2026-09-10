@@ -13,7 +13,15 @@ from typing import Any
 
 
 def data_bucket_name() -> str:
-    return os.getenv("SERENITY_DATA_BUCKET", "").strip()
+    """Return the configured private data bucket name.
+
+    EMAIL_DATA_BUCKET is the canonical setting used by the FastAPI/Cloud Run
+    deployment. SERENITY_DATA_BUCKET remains supported for backward compatibility.
+    """
+    return (
+        os.getenv("EMAIL_DATA_BUCKET", "").strip()
+        or os.getenv("SERENITY_DATA_BUCKET", "").strip()
+    )
 
 
 def using_cloud_storage() -> bool:
