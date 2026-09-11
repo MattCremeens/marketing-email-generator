@@ -39,7 +39,7 @@ from suppression import (
     ensure_unsubscribe_footer,
     suppressed_addresses,
 )
-from web_runtime import generate_email, revise_email
+from web_runtime import generate_email, revise_email, strip_markdown_html_fence
 
 ROOT = Path(__file__).resolve().parent
 DRAFT_DIR = ROOT / "data" / "drafts"
@@ -59,6 +59,8 @@ class GenerateRequest(BaseModel):
 
 class RevisionRequest(BaseModel):
     draft_id: str
+    session_id: str
+    function_call_id: str
     feedback: str = Field(min_length=1, max_length=10000)
     html: str
     subject: str = ""
@@ -108,7 +110,9 @@ def _public_asset_html(html: str) -> str:
 def _normalize_draft(draft: dict[str, str]) -> dict[str, str]:
     """Apply application-owned requirements after any agent or human edit."""
     return {
-        "html": ensure_unsubscribe_footer(_public_asset_html(draft.get("html", ""))),
+        "html": ensure_unsubscribe_footer(
+            _public_asset_html(strip_markdown_html_fence(draft.get("html", "")))
+        ),
         "subject": draft.get("subject", ""),
         "preheader": draft.get("preheader", ""),
     }
@@ -245,12 +249,26 @@ async def index():
 @app.post("/api/generate")
 async def api_generate(request: GenerateRequest):
     try:
-        draft = await generate_email(request.prompt.strip())
+        result = await generate_email(request.prompt.strip())
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Email generation failed: {exc}") from exc
+
     draft_id = str(uuid.uuid4())
-    draft = _save_draft(draft_id, draft)
-    return {"draft_id": draft_id, **draft}
+    draft = _save_draft(
+        draft_id,
+        {
+            "html": str(result.get("html", "")),
+            "subject": str(result.get("subject", "")),
+            "preheader": str(result.get("preheader", "")),
+        },
+    )
+    return {
+        "draft_id": draft_id,
+        **draft,
+        "session_id": result.get("session_id"),
+        "function_call_id": result.get("function_call_id"),
+        "approved": result.get("approved", False),
+    }
 
 
 @app.post("/api/revise")
@@ -259,16 +277,32 @@ async def api_revise(request: RevisionRequest):
     if existing is None:
         raise HTTPException(status_code=404, detail="Draft not found. Start a new email.")
     try:
-        draft = await revise_email(
-            html=request.html,
+        result = await revise_email(
+            session_id=request.session_id,
+            function_call_id=request.function_call_id,
             feedback=request.feedback.strip(),
+            html=request.html,
             subject=request.subject,
             preheader=request.preheader,
         )
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Email revision failed: {exc}") from exc
-    draft = _save_draft(request.draft_id, draft)
-    return {"draft_id": request.draft_id, **draft}
+
+    draft = _save_draft(
+        request.draft_id,
+        {
+            "html": str(result.get("html", "")),
+            "subject": str(result.get("subject", "")),
+            "preheader": str(result.get("preheader", "")),
+        },
+    )
+    return {
+        "draft_id": request.draft_id,
+        **draft,
+        "session_id": result.get("session_id"),
+        "function_call_id": result.get("function_call_id"),
+        "approved": result.get("approved", False),
+    }
 
 
 @app.post("/api/draft/save")

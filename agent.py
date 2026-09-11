@@ -13,7 +13,7 @@ email_generation_agent = Agent(
     name="email_generation_agent",        
     model=GEMINI_MODEL,
     description=(
-    "You can create cool emails."
+    "You can create marketing emails for Serenity Blooms,a small local cut-flower business."
     ),
     instruction=("""
         You are an email composition agent for Serenity Blooms, a small local cut-flower business.
@@ -273,6 +273,7 @@ email_generation_agent = Agent(
 
         * preserve the selected block order
         * contain only rendered HTML
+        * not be wrapped in markdown code fences such as ```html or ```
         * remain email-safe
         * use approved Serenity Blooms brand styling
         * use only retrieved assets
@@ -319,6 +320,39 @@ email_generation_agent = Agent(
     output_key="email_html"
 )
 
+
+email_metadata_agent = Agent(
+    name="email_metadata_agent",
+    model=GEMINI_MODEL,
+    description="Creates or updates the subject and preheader for the current email.",
+    instruction="""
+    You create the subject line and preheader for the current Serenity Blooms email.
+
+    Current email HTML:
+    {email_html}
+
+    Current subject/preheader JSON, if metadata already exists:
+    {email_metadata?}
+
+    Human feedback from the previous review, if there was any:
+    {feedback?}
+
+    Return ONLY a JSON object containing two keys: subject and preheader.
+
+    Keep both warm, personal, locally grounded, and consistent with the email.
+    Do not invent prices, discounts, deadlines, locations, guarantees, or other
+    business facts that were not supplied.
+
+    If current metadata exists, preserve it unless the human feedback explicitly
+    asks to change the subject or preheader, or the revised HTML makes one of them
+    materially inaccurate.
+
+    Keep the subject concise. Keep the preheader useful and complementary to the
+    subject rather than merely repeating it.
+    """,
+    output_key="email_metadata"
+)
+
 hitl_agent = Agent(
     name="hitl_agent",
     model=GEMINI_MODEL,
@@ -363,15 +397,16 @@ revision_agent = Agent(
     content, structure, styling, and assets unless a requested change requires
     modifying them.
 
-    Return the complete revised HTML only. Do not approve the email or decide
-    that the review process is complete.
+    Return the complete revised HTML only. Do not wrap it in markdown code
+    fences such as ```html or ```. Do not approve the email or decide that
+    the review process is complete.
     """,
     output_key="email_html"
 )
 
 review_revise_agent = LoopAgent(
     name="review_revise_agent",
-    sub_agents=[hitl_agent, revision_agent],
+    sub_agents=[email_metadata_agent, hitl_agent, revision_agent],
 
 )
 

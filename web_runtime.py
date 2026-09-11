@@ -1,198 +1,71 @@
-"""Thin programmatic runtime around the existing ADK agents for the FastAPI UI.
+"""Small bridge between FastAPI and the resumable ADK application.
 
-The CLI workflow in agent.py remains unchanged.  The browser owns the human pause,
-so the web application invokes fresh generation/revision agent instances directly.
+The agent workflow stays in agent.py. This module only starts that workflow,
+returns control to the browser when request_input pauses it, and resumes the
+same workflow when the browser sends the user's feedback.
 """
 
 import json
 import re
 import uuid
-from typing import Any
 
-from google.adk.agents import Agent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-from agent import GEMINI_MODEL, email_generation_agent, revision_agent
-from tools import (
-    get_block,
-    get_brand,
-    get_image,
-    get_logo,
-    get_profile,
-    list_block_types_subtypes,
-    list_images,
-    list_logos,
-    list_profiles,
-    render_block,
-    stitch_email,
+from agent import app
+
+_MARKDOWN_HTML_FENCE = re.compile(
+    r"^\s*```(?:html|HTML)?\s*\r?\n?(.*?)\r?\n?```\s*$",
+    re.DOTALL,
 )
 
-APP_NAME = "serenity_blooms_email_studio"
+
+def strip_markdown_html_fence(html: str) -> str:
+    """Remove a wrapping markdown code fence from model-produced HTML."""
+    text = str(html or "")
+    match = _MARKDOWN_HTML_FENCE.match(text)
+    if match:
+        return match.group(1).strip()
+
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = re.sub(r"^```(?:html|HTML)?\s*\r?\n?", "", stripped, count=1)
+        stripped = re.sub(r"\r?\n?```\s*$", "", stripped)
+        return stripped.strip()
+    return text
+
+
 USER_ID = "web-user"
 
-
-def _generation_agent() -> Agent:
-    """Create an unattached copy of the existing generation agent definition."""
-    return Agent(
-        name="web_email_generation_agent",
-        model=GEMINI_MODEL,
-        description=email_generation_agent.description,
-        instruction=email_generation_agent.instruction + """
-
-        FINAL OUTPUT CONTRACT FOR THE WEB APPLICATION:
-        Return ONLY the complete rendered HTML email as your final response.
-        Do not introduce the email. Do not explain it. Do not summarize it.
-        Do not wrap it in Markdown or triple-backtick code fences.
-        Your final response must begin with an HTML tag and contain no prose
-        before or after the email HTML.
-        """,
-        tools=[
-            list_profiles,
-            get_profile,
-            list_block_types_subtypes,
-            get_block,
-            get_image,
-            get_logo,
-            list_images,
-            list_logos,
-            get_brand,
-            render_block,
-            stitch_email,
-        ],
-        output_key="email_html",
-    )
+# Keep one session service and one runner alive for the web application.
+# InMemorySessionService is intentionally simple for local development. A
+# persistent session service can replace it later for multi-instance Cloud Run.
+session_service = InMemorySessionService()
+runner = Runner(app=app, session_service=session_service)
 
 
-def _revision_agent() -> Agent:
-    """Create an unattached copy of the existing revision agent definition."""
-    return Agent(
-        name="web_revision_agent",
-        model=GEMINI_MODEL,
-        description=revision_agent.description,
-        instruction=revision_agent.instruction + """
+def _request_input_call_id(event) -> str | None:
+    """Return the request_input function-call ID from an ADK event, if present."""
+    if not event.content or not event.content.parts:
+        return None
 
-        FINAL OUTPUT CONTRACT FOR THE WEB APPLICATION:
-        Return ONLY the complete revised HTML email. Do not add prose,
-        explanations, Markdown, or triple-backtick code fences before or after it.
-        """,
-        output_key="email_html",
-    )
+    for part in event.content.parts:
+        function_call = getattr(part, "function_call", None)
+        if function_call and function_call.name == "adk_request_input":
+            return function_call.id
+    return None
 
 
-def _metadata_agent() -> Agent:
-    return Agent(
-        name="email_metadata_agent",
-        model=GEMINI_MODEL,
-        description="Creates or revises the subject and preheader for an email draft.",
-        instruction="""
-        You write email subject lines and preheaders for Serenity Blooms.
-
-        Return ONLY a JSON object with exactly these keys:
-        {"subject": "...", "preheader": "..."}
-
-        Keep both warm, personal, locally grounded, and consistent with the email.
-        Do not invent prices, discounts, deadlines, locations, guarantees, or other
-        business facts that were not supplied.
-
-        When CURRENT SUBJECT and CURRENT PREHEADER are supplied, preserve them unless
-        USER FEEDBACK explicitly asks to change one of them, or the revised HTML makes
-        one of them materially inaccurate.  If there is no current metadata, create it.
-
-        Keep the subject concise.  Keep the preheader useful and complementary to the
-        subject rather than merely repeating it.
-        """,
-    )
-
-
-async def _run_agent(agent: Agent, message: str, state: dict[str, Any] | None = None) -> str:
-    session_service = InMemorySessionService()
-    session = await session_service.create_session(
-        app_name=APP_NAME,
-        user_id=USER_ID,
-        session_id=str(uuid.uuid4()),
-        state=state or {},
-    )
-    runner = Runner(agent=agent, app_name=APP_NAME, session_service=session_service)
-    final_text = ""
-
-    async for event in runner.run_async(
-        user_id=USER_ID,
-        session_id=session.id,
-        new_message=types.Content(role="user", parts=[types.Part(text=message)]),
-    ):
-        if event.is_final_response() and event.content and event.content.parts:
-            texts = [part.text for part in event.content.parts if getattr(part, "text", None)]
-            if texts:
-                final_text = "".join(texts).strip()
-
-    close = getattr(session_service, "close", None)
-    if callable(close):
-        close()
-
-    if not final_text:
-        raise RuntimeError("The agent completed without returning a text response.")
-    return final_text
-
-
-def _strip_code_fence(value: str) -> str:
-    value = value.strip()
-    fenced = re.match(r"^```(?:html|json)?\s*(.*?)\s*```$", value, flags=re.I | re.S)
-    return fenced.group(1).strip() if fenced else value
-
-
-def _extract_html(value: str) -> str:
-    """Return only the HTML portion of an agent response.
-
-    The prompt requires raw HTML, but this deliberately defends against an LLM
-    adding an introduction such as ``Here is the email:```html ...``` ``.  We
-    never want that explanatory text or Markdown fence to become part of the
-    message delivered through Gmail.
-    """
-    value = value.strip()
-
-    # Prefer an explicitly fenced HTML payload even when prose appears before it.
-    fenced = re.search(r"```html\s*(.*?)\s*```", value, flags=re.I | re.S)
-    if fenced:
-        candidate = fenced.group(1).strip()
+def _metadata_from_state(value) -> dict[str, str]:
+    """Convert the metadata agent's JSON output into subject/preheader fields."""
+    if isinstance(value, dict):
+        data = value
     else:
-        candidate = _strip_code_fence(value)
-
-    # Remove any accidental prose before the first plausible email HTML element.
-    starts = []
-    for pattern in (r"<!doctype\s+html", r"<html\b", r"<body\b", r"<table\b", r"<div\b"):
-        match = re.search(pattern, candidate, flags=re.I)
-        if match:
-            starts.append(match.start())
-    if not starts:
-        raise ValueError(
-            "The email agent did not return HTML. Please retry the generation request."
-        )
-    candidate = candidate[min(starts):].strip()
-
-    # If the model appended prose after a complete document, discard it.
-    html_close = list(re.finditer(r"</html\s*>", candidate, flags=re.I))
-    if html_close:
-        candidate = candidate[: html_close[-1].end()].strip()
-
-    if "```" in candidate:
-        candidate = candidate.replace("```html", "").replace("```HTML", "").replace("```", "").strip()
-
-    if not re.search(r"<(?:html|body|table|div)\b", candidate, flags=re.I):
-        raise ValueError("The email agent response could not be validated as HTML.")
-    return candidate
-
-
-def _parse_metadata(value: str) -> dict[str, str]:
-    value = _strip_code_fence(value)
-    try:
-        data = json.loads(value)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", value, flags=re.S)
-        if not match:
-            raise ValueError("Metadata agent did not return valid JSON.")
-        data = json.loads(match.group(0))
+        try:
+            data = json.loads(str(value or "{}"))
+        except json.JSONDecodeError:
+            data = {}
 
     return {
         "subject": str(data.get("subject", "")).strip(),
@@ -200,30 +73,107 @@ def _parse_metadata(value: str) -> dict[str, str]:
     }
 
 
-async def generate_email(request: str) -> dict[str, str]:
-    html = _extract_html(await _run_agent(_generation_agent(), request))
-    metadata_prompt = f"""ORIGINAL USER REQUEST:\n{request}\n\nEMAIL HTML:\n{html}"""
-    metadata = _parse_metadata(await _run_agent(_metadata_agent(), metadata_prompt))
-    return {"html": html, **metadata}
+async def _current_draft(session_id: str) -> dict[str, str]:
+    """Read the current email and metadata from ADK session state."""
+    session = await session_service.get_session(
+        app_name=app.name,
+        user_id=USER_ID,
+        session_id=session_id,
+    )
+    if session is None:
+        raise RuntimeError("The email workflow session could not be found.")
+
+    metadata = _metadata_from_state(session.state.get("email_metadata"))
+    return {
+        "html": strip_markdown_html_fence(str(session.state.get("email_html", ""))),
+        **metadata,
+    }
+
+
+async def generate_email(request: str) -> dict[str, str | bool | None]:
+    """Start the ADK workflow and run until it pauses for human review."""
+    session_id = str(uuid.uuid4())
+    await session_service.create_session(
+        app_name=app.name,
+        user_id=USER_ID,
+        session_id=session_id,
+    )
+
+    function_call_id = None
+    message = types.Content(role="user", parts=[types.Part(text=request)])
+
+    async for event in runner.run_async(
+        user_id=USER_ID,
+        session_id=session_id,
+        new_message=message,
+    ):
+        request_input_id = _request_input_call_id(event)
+        if request_input_id:
+            function_call_id = request_input_id
+
+    if not function_call_id:
+        raise RuntimeError("The email workflow completed without pausing for review.")
+
+    draft = await _current_draft(session_id)
+    return {
+        **draft,
+        "session_id": session_id,
+        "function_call_id": function_call_id,
+        "approved": False,
+    }
 
 
 async def revise_email(
-    html: str,
+    session_id: str,
+    function_call_id: str,
     feedback: str,
+    html: str,
     subject: str,
     preheader: str,
-) -> dict[str, str]:
-    revised_html = _extract_html(
-        await _run_agent(
-            _revision_agent(),
-            "Apply the requested revision.",
-            state={"email_html": html, "feedback": feedback},
-        )
+) -> dict[str, str | bool | None]:
+    """Resume the paused workflow with the human's review response.
+
+    The state_delta keeps any manual edits made in the browser in sync with the
+    ADK session before the workflow continues.
+    """
+    response = types.Content(
+        role="user",
+        parts=[
+            types.Part(
+                function_response=types.FunctionResponse(
+                    id=function_call_id,
+                    name="adk_request_input",
+                    response={"result": feedback},
+                )
+            )
+        ],
     )
 
-    metadata_prompt = f"""
-CURRENT SUBJECT:\n{subject}\n\nCURRENT PREHEADER:\n{preheader}\n
-USER FEEDBACK:\n{feedback}\n\nREVISED EMAIL HTML:\n{revised_html}
-"""
-    metadata = _parse_metadata(await _run_agent(_metadata_agent(), metadata_prompt))
-    return {"html": revised_html, **metadata}
+    current_metadata = json.dumps({"subject": subject, "preheader": preheader})
+    next_function_call_id = None
+
+    async for event in runner.run_async(
+        user_id=USER_ID,
+        session_id=session_id,
+        new_message=response,
+        state_delta={
+            "email_html": strip_markdown_html_fence(html),
+            "email_metadata": current_metadata,
+        },
+    ):
+        request_input_id = _request_input_call_id(event)
+        if request_input_id:
+            next_function_call_id = request_input_id
+
+    draft = await _current_draft(session_id)
+    approved = feedback.strip().lower() == "approve" and next_function_call_id is None
+
+    if not approved and next_function_call_id is None:
+        raise RuntimeError("The email workflow did not return to the review step.")
+
+    return {
+        **draft,
+        "session_id": session_id,
+        "function_call_id": next_function_call_id,
+        "approved": approved,
+    }
