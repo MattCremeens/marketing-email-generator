@@ -6,7 +6,7 @@ from google.adk.tools import request_input
 from tools import *
 
 
-GEMINI_MODEL = "gemini-3.5-flash-lite"
+GEMINI_MODEL = "gemini-3.5-flash"
 
 
 email_generation_agent = Agent(
